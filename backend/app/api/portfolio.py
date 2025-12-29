@@ -494,6 +494,13 @@ async def get_history_positions(
     
     for tx in all_transactions:
         code = tx.stock_code
+        # 跳过没有股票代码的交易（如 hold 决策）
+        if not code:
+            continue
+        # 跳过没有数量或价格的交易
+        if tx.quantity is None or tx.price is None:
+            continue
+            
         if code not in stock_history:
             stock_history[code] = {
                 'buy_qty': 0,
@@ -509,7 +516,7 @@ async def get_history_positions(
             stock_history[code]['buy_amount'] += tx.price * tx.quantity
             if stock_history[code]['first_buy_date'] is None or tx.executed_at.strftime('%Y-%m-%d') < stock_history[code]['first_buy_date']:
                 stock_history[code]['first_buy_date'] = tx.executed_at.strftime('%Y-%m-%d')
-        else:  # SELL
+        elif tx.side == OrderSide.SELL:
             stock_history[code]['sell_qty'] += tx.quantity
             stock_history[code]['sell_amount'] += tx.price * tx.quantity
             if stock_history[code]['last_sell_date'] is None or tx.executed_at.strftime('%Y-%m-%d') > stock_history[code]['last_sell_date']:
