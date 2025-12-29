@@ -1,0 +1,141 @@
+@import "tailwindcss";
+
+/* Zen-iOS Hybrid Design System - Custom Theme */
+@theme {
+  /* 底色规范 - 杜绝纯白 */
+  --color-ios-gray: #F2F2F7;
+  --color-cold-gray: #F9F9FB;
+  
+  /* 深空黑系列 - 主按钮 */
+  --color-space-black: #1C1C1E;
+  --color-graphite: #2C2C2E;
+  
+  /* 玻璃材质 */
+  --color-glass-white-40: rgba(255, 255, 255, 0.4);
+  --color-glass-white-50: rgba(255, 255, 255, 0.5);
+  --color-glass-white-60: rgba(255, 255, 255, 0.6);
+  
+  /* 状态颜色 */
+  --color-profit-green: #34C759;
+  --color-loss-red: #FF3B30;
+  --color-warning-orange: #FF9500;
+  --color-info-blue: #007AFF;
+  
+  /* 圆角系统 - 减半 */
+  --radius-container: 20px;
+  --radius-button: 14px;
+  --radius-input: 8px;
+  
+  /* 字体 */
+  --font-sans: 'Inter', 'SF Pro Display', system-ui, -apple-system, sans-serif;
+}
+
+/* Base styles */
+:root {
+  font-family: var(--font-sans);
+  line-height: 1.5;
+  font-weight: 400;
+  color-scheme: light;
+  color: var(--color-space-black);
+  background-color: var(--color-ios-gray);
+  font-synthesis: none;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Dark mode support */
+:root.dark {
+  color-scheme: dark;
+  color: #F2F2F7;
+  background-color: #1C1C1E;
+}
+
+.dark {
+  --color-ios-gray: #1C1C1E;
+  --color-cold-gray: #2C2C2E;
+  --color-space-black: #F2F2F7;
+  --color-graphite: #3A3A3C;
+  --color-glass-white-40: rgba(255, 255, 255, 0.1);
+  --color-glass-white-50: rgba(255, 255, 255, 0.15);
+  --color-glass-white-60: rgba(255, 255, 255, 0.2);
+}
+
+/* Dark mode component overrides */
+.dark .bg-white\/60,
+.dark .bg-white\/80 {
+  background-color: rgba(44, 44, 46, 0.6) !important;
+}
+
+.dark .bg-white {
+  background-color: #2C2C2E !important;
+}
+
+.dark .border-gray-100\/60,
+.dark .border-gray-200\/40,
+.dark .border-gray-200\/60 {
+  border-color: rgba(58, 58, 60, 0.6) !important;
+}
+
+.dark .text-space-black {
+  color: #F2F2F7 !important;
+}
+
+.dark .text-gray-500,
+.dark .text-gray-600 {
+  color: #8E8E93 !important;
+}
+
+.dark .text-gray-400 {
+  color: #636366 !important;
+}
+
+.dark .bg-gray-100,
+.dark .bg-gray-100\/50,
+.dark .bg-gray-100\/60 {
+  background-color: rgba(58, 58, 60, 0.5) !important;
+}
+
+.dark .bg-gray-50\/20,
+.dark .bg-gray-50\/50 {
+  background-color: rgba(44, 44, 46, 0.3) !important;
+}
+
+.dark .hover\:bg-gray-100:hover {
+  background-color: rgba(58, 58, 60, 0.6) !important;
+}
+
+.dark .hover\:bg-gray-50\/50:hover {
+  background-color: rgba(58, 58, 60, 0.4) !important;
+}
+
+body {
+  margin: 0;
+  min-width: 320px;
+  min-height: 100vh;
+  background-color: var(--color-ios-gray);
+}
+
+.dark body {
+  background-color: #1C1C1E;
+}
+
+#root {
+  width: 100%;
+  min-height: 100vh;
+}
+
+
+/* 抽屉动画 */
+@keyframes slide-in-right {
+  from {
+    transform: translateX(100%);
+  }
+  to {
+    transform: translateX(0);
+  }
+}
+
+.animate-slide-in-right {
+  animation: slide-in-right 0.3s ease-out;
+}

@@ -1,0 +1,83 @@
+version: '3.8'
+
+services:
+  # MySQL 数据库
+  mysql:
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/gcr.io/ml-pipeline/mysql:8.0.26
+    container_name: quant-mysql
+    restart: unless-stopped
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD:-quant123}
+      MYSQL_DATABASE: ${MYSQL_DATABASE:-quant_trading}
+      MYSQL_USER: ${MYSQL_USER:-quant}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-quant123}
+      TZ: Asia/Shanghai
+    ports:
+      - "${MYSQL_EXTERNAL_PORT:-13306}:3306"
+    volumes:
+      - mysql_data:/var/lib/mysql
+      - ./backend/migrations:/docker-entrypoint-initdb.d:ro
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost", "-u", "root", "-p${MYSQL_ROOT_PASSWORD:-quant123}"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+      start_period: 30s
+    networks:
+      - quant-network
+
+  # Redis 缓存
+  redis:
+    image: swr.cn-north-4.myhuaweicloud.com/ddn-k8s/docker.io/redis:7-alpine
+    container_name: quant-redis
+    restart: unless-stopped
+    command: redis-server --appendonly yes --requirepass ${REDIS_PASSWORD:-quant123}
+    ports:
+      - "${REDIS_EXTERNAL_PORT:-16379}:6379"
+    volumes:
+      - redis_data:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "-a", "${REDIS_PASSWORD:-quant123}", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    networks:
+      - quant-network
+
+  # 后端服务
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: quant-backend
+    restart: unless-stopped
+    environment:
+      - MYSQL_HOST=mysql
+      - MYSQL_PORT=3306
+      - MYSQL_USER=${MYSQL_USER:-quant}
+      - MYSQL_PASSWORD=${MYSQL_PASSWORD:-quant123}
+      - MYSQL_DATABASE=${MYSQL_DATABASE:-quant_trading}
+      - REDIS_HOST=redis
+      - REDIS_PORT=6379
+      - REDIS_PASSWORD=${REDIS_PASSWORD:-quant123}
+      - SCHEDULER_ENABLED=${SCHEDULER_ENABLED:-true}
+      - SCHEDULER_TIMEZONE=Asia/Shanghai
+      - DATA_SOURCE=${DATA_SOURCE:-akshare}
+      - ADMIN_SECRET_KEY=${ADMIN_SECRET_KEY:-}
+    ports:
+      - "${BACKEND_PORT:-8000}:8000"
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+    networks:
+      - quant-network
+
+networks:
+  quant-network:
+    driver: bridge
+
+volumes:
+  mysql_data:
+  redis_data:
