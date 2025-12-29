@@ -21,9 +21,17 @@ docker-compose ps
 
 数据库默认端口：MySQL `13306`，Redis `16379`
 
+使用 Docker Compose 启动时，SQL 初始化脚本会自动执行。
+
 ### 方式二：手动安装数据库
 
 自行安装 MySQL 和 Redis，确保服务运行中。
+
+手动初始化数据库：
+
+```bash
+mysql -h localhost -P 3306 -u root -p quant_trading < backend/migrations/001_initial_schema.sql
+```
 
 ---
 
