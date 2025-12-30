@@ -9,7 +9,47 @@
 
 ## 本地启动
 
-### 方式一：Docker Compose（推荐）
+### 方式一：一键部署脚本（推荐）
+
+项目提供跨平台一键部署脚本，自动检测环境、配置数据库连接、安装依赖并启动服务。
+
+**macOS / Linux:**
+```bash
+chmod +x deploy.sh
+./deploy.sh          # 启动服务
+./deploy.sh stop     # 停止服务
+./deploy.sh restart  # 重启服务
+./deploy.sh status   # 查看状态
+./deploy.sh config   # 重新配置
+```
+
+**Windows (PowerShell):**
+```powershell
+.\deploy.ps1         # 启动服务
+.\deploy.ps1 stop    # 停止服务
+.\deploy.ps1 restart # 重启服务
+.\deploy.ps1 status  # 查看状态
+.\deploy.ps1 config  # 重新配置
+```
+
+**Windows (双击运行):**
+直接双击 `deploy.bat` 文件即可启动。
+
+首次运行时，脚本会：
+1. 检测 Python 3.10+、Node.js 18+、pnpm，缺失时提示自动安装
+2. 提示输入 MySQL 和 Redis 连接配置，自动生成 `.env` 文件
+3. 创建 Python 虚拟环境并安装后端依赖
+4. 安装前端依赖
+5. 后台启动前后端服务
+
+服务启动后：
+- 前端地址: http://localhost:5173
+- 后端地址: http://localhost:8000
+- API 文档: http://localhost:8000/docs
+
+### 方式二：Docker Compose
+
+适合快速启动数据库服务：
 
 ```bash
 # 启动 MySQL 和 Redis
@@ -23,7 +63,7 @@ docker-compose ps
 
 使用 Docker Compose 启动时，SQL 初始化脚本会自动执行。
 
-### 方式二：手动安装数据库
+### 方式三：手动安装数据库
 
 自行安装 MySQL 和 Redis，确保服务运行中。
 
