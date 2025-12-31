@@ -333,3 +333,164 @@ export interface TaskLogListResponse {
   page_size: number;
   total_pages: number;
 }
+
+// ============== MCP Marketplace 相关类型 ==============
+
+/**
+ * MCP连接配置
+ */
+export interface MCPConnection {
+  connection_id: number;
+  connection_type: string;
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+}
+
+/**
+ * MCP连接配置创建请求
+ */
+export interface MCPConnectionCreate {
+  connection_type: string;
+  command?: string;
+  args?: string[];
+  env?: Record<string, string>;
+}
+
+/**
+ * MCP工具定义
+ */
+export interface MCPTool {
+  tool_id: number;
+  name: string;
+  description?: string;
+  input_schema?: Record<string, unknown>;
+  translation?: string;
+}
+
+/**
+ * MCP工具创建请求
+ */
+export interface MCPToolCreate {
+  name: string;
+  description?: string;
+  input_schema?: Record<string, unknown>;
+  translation?: string;
+}
+
+/**
+ * MCP服务
+ */
+export interface MCPServer {
+  server_id: number;
+  qualified_name: string;
+  display_name: string;
+  description?: string;
+  logo?: string;
+  creator?: string;
+  type: number;
+  tag?: string;
+  introduction?: string;
+  is_domestic: boolean;
+  package_url?: string;
+  repository_id?: string;
+  use_count: number;
+  is_enabled: boolean;
+  created_at: string;
+  updated_at?: string;
+  connections: MCPConnection[];
+  tools: MCPTool[];
+}
+
+/**
+ * MCP服务创建请求
+ */
+export interface MCPServerCreate {
+  qualified_name: string;
+  display_name: string;
+  description?: string;
+  logo?: string;
+  creator?: string;
+  type?: number;
+  tag?: string;
+  introduction?: string;
+  is_domestic?: boolean;
+  package_url?: string;
+  repository_id?: string;
+  connections?: MCPConnectionCreate[];
+  tools?: MCPToolCreate[];
+}
+
+/**
+ * MCP服务更新请求
+ */
+export interface MCPServerUpdate {
+  display_name?: string;
+  description?: string;
+  logo?: string;
+  creator?: string;
+  type?: number;
+  tag?: string;
+  introduction?: string;
+  is_domestic?: boolean;
+  package_url?: string;
+  repository_id?: string;
+  connections?: MCPConnectionCreate[];
+  tools?: MCPToolCreate[];
+}
+
+/**
+ * MCP服务列表响应
+ */
+export interface MCPServerListResponse {
+  servers: MCPServer[];
+  total: number;
+  page: number;
+  page_size: number;
+  total_pages: number;
+}
+
+/**
+ * MCP生态统计
+ */
+export interface MCPStats {
+  total_servers: number;
+  enabled_servers: number;
+  total_use_count: number;
+}
+
+/**
+ * MCP服务状态更新请求
+ */
+export interface MCPStatusUpdate {
+  is_enabled: boolean;
+}
+
+/**
+ * MCP工具测试请求
+ */
+export interface MCPToolTestRequest {
+  arguments: Record<string, unknown>;
+}
+
+/**
+ * MCP工具测试响应
+ */
+export interface MCPToolTestResponse {
+  success: boolean;
+  result?: unknown;
+  error_message?: string;
+  duration_ms?: number;
+}
+
+/**
+ * MCP服务搜索参数
+ */
+export interface MCPSearchParams {
+  page?: number;
+  page_size?: number;
+  server_id?: number;
+  display_name?: string;
+  description?: string;
+  status?: 'enabled' | 'disabled';
+}

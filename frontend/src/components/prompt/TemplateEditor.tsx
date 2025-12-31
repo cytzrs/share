@@ -65,6 +65,9 @@ const PLACEHOLDER_CATEGORIES = {
     { name: 'queue_amount', label: '排队金额', description: '当前排队买入金额' },
     { name: 'queue_position', label: '排队位置', description: '预估排队位置' },
   ],
+  'MCP': [
+    { name: 'mcp_tools', label: 'MCP工具', description: '所有可用的MCP服务及工具列表（包含工具名称、描述、参数等）' },
+  ],
 };
 
 // 所有占位符的扁平列表
@@ -82,6 +85,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   '大盘': 'bg-red-100 text-red-700 border-red-200',
   '时间': 'bg-indigo-100 text-indigo-700 border-indigo-200',
   '涨停': 'bg-amber-100 text-amber-700 border-amber-200',
+  'MCP': 'bg-emerald-100 text-emerald-700 border-emerald-200',
 };
 
 interface TemplateEditorProps {

@@ -20,6 +20,15 @@ import type {
   TaskLogDetail,
   TaskListResponse,
   TaskLogListResponse,
+  MCPServer,
+  MCPServerCreate,
+  MCPServerUpdate,
+  MCPServerListResponse,
+  MCPStats,
+  MCPStatusUpdate,
+  MCPToolTestRequest,
+  MCPToolTestResponse,
+  MCPSearchParams,
 } from '../types';
 
 // API Base URL - can be configured via environment variable
@@ -1139,6 +1148,84 @@ export const stockApi = {
   },
 };
 
+// ============ MCP Marketplace API ============
+
+/**
+ * MCP市场管理API
+ */
+export const mcpApi = {
+  /**
+   * 获取MCP服务列表（支持搜索、分页）
+   */
+  list: async (params?: MCPSearchParams): Promise<MCPServerListResponse> => {
+    const response = await apiClient.get<MCPServerListResponse>('/mcp/servers', { params });
+    return response.data;
+  },
+
+  /**
+   * 获取MCP服务详情
+   */
+  getById: async (serverId: number): Promise<MCPServer> => {
+    const response = await apiClient.get<MCPServer>(`/mcp/servers/${serverId}`);
+    return response.data;
+  },
+
+  /**
+   * 创建MCP服务
+   */
+  create: async (data: MCPServerCreate): Promise<MCPServer> => {
+    const response = await apiClient.post<MCPServer>('/mcp/servers', data);
+    return response.data;
+  },
+
+  /**
+   * 更新MCP服务
+   */
+  update: async (serverId: number, data: MCPServerUpdate): Promise<MCPServer> => {
+    const response = await apiClient.put<MCPServer>(`/mcp/servers/${serverId}`, data);
+    return response.data;
+  },
+
+  /**
+   * 删除MCP服务
+   */
+  delete: async (serverId: number): Promise<{ success: boolean; message: string }> => {
+    const response = await apiClient.delete<{ success: boolean; message: string }>(`/mcp/servers/${serverId}`);
+    return response.data;
+  },
+
+  /**
+   * 启用/停用MCP服务
+   */
+  updateStatus: async (serverId: number, data: MCPStatusUpdate): Promise<MCPServer> => {
+    const response = await apiClient.patch<MCPServer>(`/mcp/servers/${serverId}/status`, data);
+    return response.data;
+  },
+
+  /**
+   * 测试MCP工具
+   */
+  testTool: async (
+    serverId: number,
+    toolName: string,
+    data: MCPToolTestRequest
+  ): Promise<MCPToolTestResponse> => {
+    const response = await apiClient.post<MCPToolTestResponse>(
+      `/mcp/servers/${serverId}/tools/${toolName}/test`,
+      data
+    );
+    return response.data;
+  },
+
+  /**
+   * 获取MCP生态统计数据
+   */
+  getStats: async (): Promise<MCPStats> => {
+    const response = await apiClient.get<MCPStats>('/mcp/stats');
+    return response.data;
+  },
+};
+
 // Export the axios instance for custom requests
 export { apiClient };
 
@@ -1154,6 +1241,7 @@ export const api = {
   auth: authApi,
   market: marketApi,
   stock: stockApi,
+  mcp: mcpApi,
 };
 
 export default api;

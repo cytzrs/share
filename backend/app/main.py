@@ -5,7 +5,7 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-from app.api import agents, templates, quotes, portfolio, llm_providers, system, tasks, auth, market, stock
+from app.api import agents, templates, quotes, portfolio, llm_providers, system, tasks, auth, market, stock, mcp
 from app.api.errors import register_exception_handlers
 from app.core.config import settings
 from app.core.scheduler import get_scheduler, shutdown_scheduler
@@ -143,6 +143,7 @@ app.include_router(system.router, prefix="/system", tags=["System Config"])
 app.include_router(tasks.router, prefix="/tasks", tags=["Task Management"])
 app.include_router(market.router, prefix="/market", tags=["Market Data"])
 app.include_router(stock.router, prefix="/stock", tags=["Stock Data"])
+app.include_router(mcp.router, prefix="/mcp", tags=["MCP Marketplace"])
 
 
 # 单独注册compare端点

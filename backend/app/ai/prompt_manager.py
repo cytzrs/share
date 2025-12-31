@@ -352,6 +352,10 @@ class PromptManager:
         if context.queue_position is not None:
             result["queue_position"] = context.queue_position
         
+        # MCP工具类
+        if context.mcp_tools is not None:
+            result["mcp_tools"] = context.mcp_tools
+        
         return result
     
     def get_placeholders(self, content: str) -> List[str]:
@@ -443,6 +447,9 @@ SYSTEM_PLACEHOLDERS = [
     {"name": "limit_up_order_amount", "label": "封单金额", "category": "涨停", "description": "涨停板封单金额（亿元）"},
     {"name": "queue_amount", "label": "排队金额", "category": "涨停", "description": "当前排队买入金额"},
     {"name": "queue_position", "label": "排队位置", "category": "涨停", "description": "预估排队位置"},
+    
+    # MCP工具类
+    {"name": "mcp_tools", "label": "MCP工具", "category": "MCP", "description": "所有可用的MCP服务及工具列表（包含工具名称、描述、参数等）"},
 ]
 
 

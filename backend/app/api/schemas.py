@@ -388,3 +388,131 @@ class TaskLogDetail(BaseModel):
 class TaskLogListResponse(PaginatedResponse):
     """任务日志列表响应"""
     logs: List[TaskLogSummary] = Field(description="日志列表")
+
+
+# ============== MCP Marketplace 相关模型 ==============
+
+
+class MCPConnectionCreate(BaseModel):
+    """创建MCP连接配置请求"""
+    connection_type: str = Field(..., min_length=1, max_length=20, description="连接类型: stdio/http/sse")
+    command: Optional[str] = Field(default=None, max_length=200, description="启动命令")
+    args: Optional[List[str]] = Field(default=None, description="命令参数")
+    env: Optional[Dict[str, str]] = Field(default=None, description="环境变量")
+
+
+class MCPConnectionResponse(BaseModel):
+    """MCP连接配置响应"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    connection_id: int = Field(description="连接配置ID")
+    connection_type: str = Field(description="连接类型")
+    command: Optional[str] = Field(default=None, description="启动命令")
+    args: Optional[List[str]] = Field(default=None, description="命令参数")
+    env: Optional[Dict[str, str]] = Field(default=None, description="环境变量")
+
+
+class MCPToolCreate(BaseModel):
+    """创建MCP工具请求"""
+    name: str = Field(..., min_length=1, max_length=100, description="工具名称")
+    description: Optional[str] = Field(default=None, description="工具描述")
+    input_schema: Optional[Dict[str, Any]] = Field(default=None, description="输入参数Schema")
+    translation: Optional[str] = Field(default=None, max_length=500, description="中文翻译")
+
+
+class MCPToolResponse(BaseModel):
+    """MCP工具响应"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    tool_id: int = Field(description="工具ID")
+    name: str = Field(description="工具名称")
+    description: Optional[str] = Field(default=None, description="工具描述")
+    input_schema: Optional[Dict[str, Any]] = Field(default=None, description="输入参数Schema")
+    translation: Optional[str] = Field(default=None, description="中文翻译")
+
+
+class MCPServerCreate(BaseModel):
+    """创建MCP服务请求"""
+    qualified_name: str = Field(..., min_length=1, max_length=200, description="唯一标识名")
+    display_name: str = Field(..., min_length=1, max_length=100, description="显示名称")
+    description: Optional[str] = Field(default=None, description="服务描述")
+    logo: Optional[str] = Field(default=None, max_length=500, description="Logo URL")
+    creator: Optional[str] = Field(default=None, max_length=100, description="创建者/提供商")
+    type: int = Field(default=1, ge=1, le=3, description="服务类型：1=官方，2=社区，3=第三方")
+    tag: Optional[str] = Field(default=None, max_length=500, description="标签，逗号分隔")
+    introduction: Optional[str] = Field(default=None, description="详细介绍")
+    is_domestic: bool = Field(default=True, description="是否国内服务")
+    package_url: Optional[str] = Field(default=None, max_length=500, description="包地址URL")
+    repository_id: Optional[str] = Field(default=None, max_length=100, description="仓库ID")
+    connections: List[MCPConnectionCreate] = Field(default=[], description="连接配置列表")
+    tools: List[MCPToolCreate] = Field(default=[], description="工具定义列表")
+
+
+class MCPServerUpdate(BaseModel):
+    """更新MCP服务请求"""
+    display_name: Optional[str] = Field(default=None, min_length=1, max_length=100, description="显示名称")
+    description: Optional[str] = Field(default=None, description="服务描述")
+    logo: Optional[str] = Field(default=None, max_length=500, description="Logo URL")
+    creator: Optional[str] = Field(default=None, max_length=100, description="创建者/提供商")
+    type: Optional[int] = Field(default=None, ge=1, le=3, description="服务类型")
+    tag: Optional[str] = Field(default=None, max_length=500, description="标签")
+    introduction: Optional[str] = Field(default=None, description="详细介绍")
+    is_domestic: Optional[bool] = Field(default=None, description="是否国内服务")
+    package_url: Optional[str] = Field(default=None, max_length=500, description="包地址URL")
+    repository_id: Optional[str] = Field(default=None, max_length=100, description="仓库ID")
+    connections: Optional[List[MCPConnectionCreate]] = Field(default=None, description="连接配置列表")
+    tools: Optional[List[MCPToolCreate]] = Field(default=None, description="工具定义列表")
+
+
+class MCPServerResponse(BaseModel):
+    """MCP服务响应"""
+    model_config = ConfigDict(from_attributes=True)
+    
+    server_id: int = Field(description="服务ID")
+    qualified_name: str = Field(description="唯一标识名")
+    display_name: str = Field(description="显示名称")
+    description: Optional[str] = Field(default=None, description="服务描述")
+    logo: Optional[str] = Field(default=None, description="Logo URL")
+    creator: Optional[str] = Field(default=None, description="创建者/提供商")
+    type: int = Field(description="服务类型")
+    tag: Optional[str] = Field(default=None, description="标签")
+    introduction: Optional[str] = Field(default=None, description="详细介绍")
+    is_domestic: bool = Field(description="是否国内服务")
+    package_url: Optional[str] = Field(default=None, description="包地址URL")
+    repository_id: Optional[str] = Field(default=None, description="仓库ID")
+    use_count: int = Field(description="使用次数")
+    is_enabled: bool = Field(description="是否启用")
+    created_at: datetime = Field(description="创建时间")
+    updated_at: Optional[datetime] = Field(default=None, description="更新时间")
+    connections: List[MCPConnectionResponse] = Field(default=[], description="连接配置列表")
+    tools: List[MCPToolResponse] = Field(default=[], description="工具定义列表")
+
+
+class MCPServerListResponse(PaginatedResponse):
+    """MCP服务列表响应"""
+    servers: List[MCPServerResponse] = Field(description="服务列表")
+
+
+class MCPStatsResponse(BaseModel):
+    """MCP生态统计响应"""
+    total_servers: int = Field(description="总MCP服务数量")
+    enabled_servers: int = Field(description="启用MCP服务数量")
+    total_use_count: int = Field(description="总调用量")
+
+
+class MCPStatusUpdate(BaseModel):
+    """MCP服务状态更新请求"""
+    is_enabled: bool = Field(..., description="是否启用")
+
+
+class MCPToolTestRequest(BaseModel):
+    """MCP工具测试请求"""
+    arguments: Dict[str, Any] = Field(default={}, description="工具参数")
+
+
+class MCPToolTestResponse(BaseModel):
+    """MCP工具测试响应"""
+    success: bool = Field(description="是否成功")
+    result: Optional[Any] = Field(default=None, description="执行结果")
+    error_message: Optional[str] = Field(default=None, description="错误信息")
+    duration_ms: Optional[int] = Field(default=None, description="执行耗时(毫秒)")

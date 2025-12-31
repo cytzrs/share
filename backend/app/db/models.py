@@ -345,3 +345,105 @@ class SystemTaskLogModel(Base):
 
     # 关系
     task = relationship("SystemTaskModel", back_populates="logs")
+
+
+# ============== MCP Marketplace 模型 ==============
+
+
+class MCPServerModel(Base):
+    """MCP服务主表"""
+
+    __tablename__ = "mcp_servers"
+
+    server_id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
+    qualified_name = Column(String(200), unique=True, nullable=False)
+    display_name = Column(String(100), nullable=False)
+    description = Column(Text)
+    logo = Column(String(500))
+    creator = Column(String(100))
+    type = Column(Integer, default=1)  # 1=官方，2=社区，3=第三方
+    tag = Column(String(500))
+    introduction = Column(Text)
+    is_domestic = Column(Integer, default=1)  # 0=否，1=是
+    package_url = Column(String(500))
+    repository_id = Column(String(100))
+    use_count = Column(BigInteger().with_variant(Integer, "sqlite"), default=0)
+    is_enabled = Column(Integer, default=1)  # 0=禁用，1=启用
+    is_deleted = Column(Integer, default=0)  # 0=正常，1=已删除
+    created_at = Column(TIMESTAMP, server_default=func.current_timestamp())
+    updated_at = Column(
+        TIMESTAMP,
+        server_default=func.current_timestamp(),
+        onupdate=func.current_timestamp(),
+    )
+
+    __table_args__ = (
+        Index("idx_display_name", "display_name"),
+        Index("idx_is_enabled", "is_enabled"),
+        Index("idx_is_deleted", "is_deleted"),
+        Index("idx_mcp_type", "type"),
+        Index("idx_mcp_created_at", "created_at"),
+    )
+
+    # 关系
+    connections = relationship(
+        "MCPConnectionModel",
+        back_populates="server",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
+    tools = relationship(
+        "MCPToolModel",
+        back_populates="server",
+        cascade="all, delete-orphan",
+        lazy="joined",
+    )
+
+
+class MCPConnectionModel(Base):
+    """MCP连接配置表"""
+
+    __tablename__ = "mcp_connections"
+
+    connection_id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
+    server_id = Column(
+        BigInteger().with_variant(Integer, "sqlite"),
+        ForeignKey("mcp_servers.server_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    connection_type = Column(String(20), nullable=False)  # stdio/http/sse
+    command = Column(String(200))
+    args = Column(JSON)
+    env = Column(JSON)
+    created_at = Column(TIMESTAMP, server_default=func.current_timestamp())
+
+    __table_args__ = (Index("idx_mcp_conn_server_id", "server_id"),)
+
+    # 关系
+    server = relationship("MCPServerModel", back_populates="connections")
+
+
+class MCPToolModel(Base):
+    """MCP工具定义表"""
+
+    __tablename__ = "mcp_tools"
+
+    tool_id = Column(BigInteger().with_variant(Integer, "sqlite"), primary_key=True, autoincrement=True)
+    server_id = Column(
+        BigInteger().with_variant(Integer, "sqlite"),
+        ForeignKey("mcp_servers.server_id", ondelete="CASCADE"),
+        nullable=False,
+    )
+    name = Column(String(100), nullable=False)
+    description = Column(Text)
+    input_schema = Column(JSON)
+    translation = Column(String(500))
+    created_at = Column(TIMESTAMP, server_default=func.current_timestamp())
+
+    __table_args__ = (
+        Index("idx_mcp_tool_server_id", "server_id"),
+        Index("idx_mcp_tool_name", "name"),
+    )
+
+    # 关系
+    server = relationship("MCPServerModel", back_populates="tools")

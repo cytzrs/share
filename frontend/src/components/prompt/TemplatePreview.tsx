@@ -63,6 +63,8 @@ const PLACEHOLDER_LABELS: Record<string, string> = {
   limit_up_order_amount: '封单金额',
   queue_amount: '排队金额',
   queue_position: '排队位置',
+  // MCP工具类
+  mcp_tools: 'MCP工具列表',
 };
 
 // Default sample data for preview
@@ -217,6 +219,22 @@ const DEFAULT_SAMPLE_DATA: Record<string, string> = {
   limit_up_order_amount: '2.5',
   queue_amount: '0.8亿',
   queue_position: '约32%位置',
+  // MCP工具示例
+  mcp_tools: `## 可用MCP工具
+
+### 股票数据服务 (stock-data-mcp)
+| 工具名称 | 描述 |
+|----------|------|
+| get_stock_quote | 获取股票实时行情 |
+| get_stock_history | 获取股票历史数据 |
+| get_market_overview | 获取市场概况 |
+
+### 交易服务 (trading-mcp)
+| 工具名称 | 描述 |
+|----------|------|
+| place_order | 下单交易 |
+| cancel_order | 撤销订单 |
+| get_positions | 获取持仓信息 |`,
 };
 
 /**

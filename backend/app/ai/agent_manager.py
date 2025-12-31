@@ -232,6 +232,7 @@ class ModelAgentManager:
         hot_stocks: Optional[List[Dict[str, Any]]] = None,
         hot_stocks_quotes: Optional[str] = None,
         positions_quotes: Optional[str] = None,
+        mcp_tools: Optional[str] = None,
     ) -> DecisionResult:
         """
         执行一次决策周期
@@ -254,6 +255,9 @@ class ModelAgentManager:
             market_sentiment: 市场情绪数据
             index_overview: 大盘概况数据
             hot_stocks: 热门股票列表
+            hot_stocks_quotes: 热门股票近3日行情
+            positions_quotes: 持仓股票历史行情
+            mcp_tools: MCP工具列表（Markdown格式）
             
         Returns:
             DecisionResult: 决策结果
@@ -319,6 +323,8 @@ class ModelAgentManager:
                 current_date=datetime.now(CHINA_TZ).strftime("%Y-%m-%d"),
                 current_weekday=self._get_weekday_name(datetime.now(CHINA_TZ).weekday()),
                 is_trading_day=self._is_trading_time(),
+                # MCP工具字段
+                mcp_tools=mcp_tools,
             )
             
             # 2. 渲染提示词

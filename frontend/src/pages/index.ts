@@ -8,3 +8,4 @@ export { default as Settings } from './Settings';
 export { default as SystemSettings } from './SystemSettings';
 export { default as MarketData } from './MarketData';
 export { default as LLMLogs } from './LLMLogs';
+export { default as MCPMarketplace } from './MCPMarketplace';

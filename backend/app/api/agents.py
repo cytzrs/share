@@ -314,6 +314,27 @@ def _get_positions_quotes(db: Session, agent_id: str) -> str:
     return "\n".join(lines)
 
 
+def _get_mcp_tools_markdown(db: Session) -> str:
+    """获取所有MCP服务及工具信息，格式化为Markdown
+    
+    用于提示词占位符 {{mcp_tools}}
+    
+    Args:
+        db: 数据库会话
+        
+    Returns:
+        Markdown格式的MCP工具列表
+    """
+    from app.services.mcp_service import MCPService
+    
+    try:
+        mcp_service = MCPService(db)
+        return mcp_service.get_all_tools_markdown()
+    except Exception as e:
+        logger.error(f"获取MCP工具数据失败: {e}")
+        return "暂无可用的MCP工具"
+
+
 def _model_to_response(agent: ModelAgent, db: Session = None, include_transactions: bool = False) -> AgentResponse:
     """将ModelAgent转换为响应模型"""
     from app.db.repositories import TransactionRepository, OrderRepository
@@ -564,6 +585,9 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
         hot_stocks_quotes = _get_hot_stocks_quotes(db)
         positions_quotes = _get_positions_quotes(db, agent_id)
         
+        # 获取MCP工具数据
+        mcp_tools = _get_mcp_tools_markdown(db)
+        
         result = await manager.execute_decision_cycle(
             agent=agent,
             portfolio=portfolio,
@@ -575,6 +599,7 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
             hot_stocks=prompt_market_data.get("hot_stocks"),
             hot_stocks_quotes=hot_stocks_quotes,
             positions_quotes=positions_quotes,
+            mcp_tools=mcp_tools,
         )
         
         llm_log_id = latest_llm_log_id[0]

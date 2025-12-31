@@ -1,5 +1,5 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
-import { Dashboard, Agents, Portfolio, Transactions, Templates, Compare, Settings, SystemSettings, MarketData, LLMLogs } from './pages';
+import { Dashboard, Agents, Portfolio, Transactions, Templates, Compare, Settings, SystemSettings, MarketData, LLMLogs, MCPMarketplace } from './pages';
 import { Layout } from './components/layout';
 import { ThemeProvider, AuthProvider, ToastProvider } from './contexts';
 import './App.css';
@@ -23,6 +23,7 @@ function App() {
                 <Route path="/compare" element={<Compare />} />
                 <Route path="/providers" element={<Settings />} />
                 <Route path="/settings" element={<SystemSettings />} />
+                <Route path="/mcp" element={<MCPMarketplace />} />
                 <Route path="*" element={<Navigate to="/" replace />} />
               </Routes>
             </Layout>

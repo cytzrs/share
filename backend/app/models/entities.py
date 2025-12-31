@@ -218,6 +218,9 @@ class PromptContext:
     limit_up_order_amount: Optional[str] = None  # 封单金额（亿元）
     queue_amount: Optional[str] = None  # 当前排队金额
     queue_position: Optional[str] = None  # 预估排队位置
+    
+    # MCP工具类
+    mcp_tools: Optional[str] = None  # MCP工具列表（markdown格式）
 
 
 @dataclass
