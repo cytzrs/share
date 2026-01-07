@@ -412,11 +412,11 @@ class Scheduler:
     ) -> ScheduleRecord:
         """
         执行决策任务
-        
+
         Args:
             agent_id: Agent ID
             is_manual: 是否手动触发
-            
+
         Returns:
             ScheduleRecord: 执行记录
         """
@@ -442,10 +442,18 @@ class Scheduler:
         
         try:
             if self._decision_callback is None:
-                raise ValueError("决策回调函数未设置")
-            
-            # 执行决策回调
-            result = await self._call_decision_callback(agent_id)
+                # 尝试使用默认的决策回调实现
+                from app.db.session import SessionLocal
+                from app.api.agents import trigger_agent_decision
+                
+                db = SessionLocal()
+                try:
+                    result = await trigger_agent_decision(agent_id, db)
+                finally:
+                    db.close()
+            else:
+                # 执行决策回调
+                result = await self._call_decision_callback(agent_id)
             
             # 更新记录
             record.completed_at = datetime.now()
@@ -492,7 +500,15 @@ class Scheduler:
     async def _call_decision_callback(self, agent_id: str) -> Any:
         """调用决策回调函数"""
         if self._decision_callback is None:
-            raise ValueError("决策回调函数未设置")
+            # 尝试使用默认的决策回调实现
+            from app.db.session import SessionLocal
+            from app.api.agents import trigger_agent_decision
+            
+            db = SessionLocal()
+            try:
+                return await trigger_agent_decision(agent_id, db)
+            finally:
+                db.close()
         
         result = self._decision_callback(agent_id)
         

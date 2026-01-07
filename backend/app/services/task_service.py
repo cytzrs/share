@@ -543,20 +543,27 @@ class TaskService:
     def _create_task_executor_callback(self, task_id: str):
         """
         创建任务执行回调函数
-        
+
         Args:
             task_id: 任务ID
-            
+
         Returns:
             Callable: 回调函数
         """
         async def execute_task():
             from app.db.session import SessionLocal
             from app.core.task_executor import TaskExecutor
+            from app.api.agents import trigger_agent_decision
             
             db = SessionLocal()
             try:
                 executor = TaskExecutor(db)
+                
+                # 设置决策回调函数
+                async def decision_callback(agent_id: str):
+                    return await trigger_agent_decision(agent_id, db)
+                
+                executor.set_decision_callback(decision_callback)
                 await executor.execute_task(task_id)
             finally:
                 db.close()
