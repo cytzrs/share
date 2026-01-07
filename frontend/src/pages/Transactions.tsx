@@ -108,14 +108,17 @@ const Transactions: React.FC = () => {
   // State for sorting
   const [sortConfig, setSortConfig] = useState<SortConfig>({ key: 'executed_at', direction: 'desc' });
   
+  // Get today's date in YYYY-MM-DD format
+  const today = new Date().toISOString().split('T')[0];
+
   // State for filtering
   const [filters, setFilters] = useState<FilterConfig>({
     agentId: '',
     providerId: '',
     side: '',
     stockCode: '',
-    startDate: '',
-    endDate: '',
+    startDate: today,
+    endDate: today,
   });
   
   // State for providers list
