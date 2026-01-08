@@ -5,6 +5,7 @@ import requests
 import logging
 from typing import Optional
 from app.core.order_processor import OrderResult
+from app.core.config import settings
 
 
 logger = logging.getLogger(__name__)
@@ -15,11 +16,12 @@ class TelegramNotifier:
     
     def __init__(self):
         """初始化 Telegram 通知器"""
-        # 从环境变量获取配置
-        self.bot_token = os.getenv('TELEGRAM_BOT_TOKEN', '')
-        self.chat_id = os.getenv('TELEGRAM_CHAT_ID', '')
+        # 从settings获取配置，优先使用环境变量
+        self.bot_token = getattr(settings, 'TELEGRAM_BOT_TOKEN', '')
+        self.chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', '')
         self.enabled = bool(self.bot_token and self.chat_id)
         logger.info(f"Telegram notifier initialized - enabled: {self.enabled}, chat_id: {self.chat_id}")
+        logger.debug(f"Bot token: {'***' + self.bot_token[-4:] if self.bot_token else 'None'}")
     
     def send_trade_notification(self, order_result: OrderResult) -> bool:
         """
