@@ -612,12 +612,14 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
             from app.models.enums import OrderSide, OrderStatus
             from app.db.repositories import OrderRepository, TransactionRepository, PositionRepository
             from app.db.models import OrderModel, TransactionModel
+            from app.services.telegram_notifier import TelegramNotifier
             import uuid as uuid_module
             
             processor = OrderProcessor(check_trading_time=False)
             order_repo = OrderRepository(db)
             tx_repo = TransactionRepository(db)
             position_repo = PositionRepository(db)
+            telegram_notifier = TelegramNotifier()
             
             for decision in result.decisions:
                 if decision.decision.value in ("hold", "wait"):
@@ -659,6 +661,8 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
                 quantity = decision.quantity
                 
                 stock_data = {}
+                stock_name = ""
+                open_price = Decimal("0")
                 quote_model = (
                     db.query(StockQuoteModel)
                     .filter(StockQuoteModel.stock_code == stock_code)
@@ -670,6 +674,8 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
                         "close": float(quote_model.close_price),
                         "prev_close": float(quote_model.prev_close) if quote_model.prev_close else float(quote_model.close_price),
                     }
+                    stock_name = quote_model.stock_name or ""
+                    open_price = quote_model.open_price or Decimal("0")
                 
                 price = Decimal(str(decision.price or stock_data.get("close", 0)))
                 prev_close = Decimal(str(stock_data.get("prev_close", price)))
@@ -680,7 +686,10 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
                 order = Order(
                     order_id=str(uuid_module.uuid4()),
                     agent_id=agent_id,
+                    agent_name=agent.name,  # 添加agent名称
                     stock_code=stock_code,
+                    stock_name=stock_name,  # 添加股票名称
+                    open_price=open_price,  # 添加开盘价
                     side=OrderSide.BUY if decision.decision.value == "buy" else OrderSide.SELL,
                     quantity=quantity,
                     price=price,
@@ -700,6 +709,8 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
                     order_repo.save(order_result.order)
                     if order_result.transaction:
                         tx_repo.save(order_result.transaction)
+                        # 发送 Telegram 通知
+                        telegram_notifier.send_trade_notification(order_result)
                     position_repo.delete(agent_id, stock_code)
                     for pos in portfolio.positions:
                         if pos.stock_code == stock_code and pos.shares > 0:
@@ -1238,6 +1249,8 @@ async def trigger_decision(
             order_repo = OrderRepository(db)
             tx_repo = TransactionRepository(db)
             position_repo = PositionRepository(db)
+            from app.services.telegram_notifier import TelegramNotifier
+            telegram_notifier = TelegramNotifier()
                 
             # 处理每个决策
             for decision in result.decisions:
@@ -1313,6 +1326,7 @@ async def trigger_decision(
                 order = Order(
                     order_id=str(uuid.uuid4()),
                     agent_id=agent_id,
+                    agent_name=agent.name,  # 添加agent名称
                     stock_code=stock_code,
                     side=OrderSide.BUY if decision.decision.value == "buy" else OrderSide.SELL,
                     quantity=quantity,
@@ -1337,6 +1351,8 @@ async def trigger_decision(
                     # 保存成交记录到数据库
                     if order_result.transaction:
                         tx_repo.save(order_result.transaction)
+                        # 发送 Telegram 通知
+                        telegram_notifier.send_trade_notification(order_result)
                     
                     # 更新数据库中的持仓
                     position_repo.delete(agent_id, stock_code)

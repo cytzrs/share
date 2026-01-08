@@ -68,6 +68,9 @@ class Order:
     quantity: int
     price: Decimal
     created_at: datetime
+    agent_name: Optional[str] = None  # Agent名称
+    stock_name: Optional[str] = None  # 股票名称
+    open_price: Optional[Decimal] = None  # 开盘价
     status: OrderStatus = OrderStatus.PENDING
     reject_reason: Optional[str] = None
     reason: Optional[str] = None  # AI交易理由
