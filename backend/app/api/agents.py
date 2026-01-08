@@ -452,6 +452,7 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
     from app.models.entities import PromptTemplate, Portfolio
     from app.data.repositories import SentimentScoreRepository
     from app.core.locks import agent_decision_lock, LockAcquisitionError
+    from app.services.telegram_notifier import TelegramNotifier
     
     # 获取决策锁，防止同一 Agent 并发执行
     lock = agent_decision_lock(agent_id)
@@ -612,7 +613,7 @@ async def trigger_agent_decision(agent_id: str, db: Session) -> dict:
             from app.models.enums import OrderSide, OrderStatus
             from app.db.repositories import OrderRepository, TransactionRepository, PositionRepository
             from app.db.models import OrderModel, TransactionModel
-            from app.services.telegram_notifier import TelegramNotifier
+            
             import uuid as uuid_module
             
             processor = OrderProcessor(check_trading_time=False)

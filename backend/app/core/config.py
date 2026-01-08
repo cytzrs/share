@@ -51,7 +51,7 @@ class Settings(BaseSettings):
     CORS_ORIGINS: List[str] = ["*"]
 
     # 交易配置
-    DEFAULT_INITIAL_CASH: float = 20000.0
+    DEFAULT_INITIAL_CASH: float = 100000.0
     COMMISSION_RATE: float = 0.0003  # 佣金费率 万分之三
     STAMP_TAX_RATE: float = 0.001  # 印花税 千分之一
     TRANSFER_FEE_RATE: float = 0.00002  # 过户费 万分之0.2

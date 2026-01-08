@@ -14,7 +14,7 @@ import asyncio
 import logging
 from concurrent.futures import ThreadPoolExecutor
 from dataclasses import dataclass, field
-from datetime import datetime
+from datetime import datetime, time
 from enum import Enum
 from typing import Any, Callable, Dict, List, Optional
 
@@ -30,6 +30,45 @@ from app.models.enums import ScheduleType
 
 
 logger = logging.getLogger(__name__)
+
+
+def is_trading_hours() -> bool:
+    """
+    检查当前是否在A股交易时段内
+    
+    Returns:
+        bool: 是否在交易时段内
+    """
+    now = datetime.now()
+    current_time = now.time()
+    current_weekday = now.weekday()
+    
+    logger.info(f"交易时段检查 - 当前时间: {now.strftime('%Y-%m-%d %H:%M:%S')}, 星期: {current_weekday}")
+    
+    # 检查是否是交易日（周一至周五）
+    if current_weekday >= 5:  # 5=周六, 6=周日
+        logger.info(f"当前是周末 ({now.strftime('%Y-%m-%d %A')})，跳过任务执行")
+        return False
+    
+    # 检查是否在交易时间内
+    morning_start = time(9, 21)
+    morning_end = time(11, 30)
+    afternoon_start = time(13, 0)
+    afternoon_end = time(15, 0)
+    
+    logger.info(f"交易时段范围 - 上午: {morning_start.strftime('%H:%M')}-{morning_end.strftime('%H:%M')}, 下午: {afternoon_start.strftime('%H:%M')}-{afternoon_end.strftime('%H:%M')}")
+    
+    is_morning_trading = morning_start <= current_time <= morning_end
+    is_afternoon_trading = afternoon_start <= current_time <= afternoon_end
+    
+    logger.info(f"交易时段检查结果 - 上午: {is_morning_trading}, 下午: {is_afternoon_trading}")
+    
+    if not (is_morning_trading or is_afternoon_trading):
+        logger.info(f"当前不在交易时段内 ({current_time.strftime('%H:%M:%S')})，跳过任务执行")
+        return False
+    
+    logger.info(f"当前在交易时段内 ({current_time.strftime('%H:%M:%S')})，执行任务")
+    return True
 
 
 class ScheduleStatus(str, Enum):
@@ -441,6 +480,27 @@ class Scheduler:
         retry_delay = config.retry_delay if config else settings.SCHEDULER_RETRY_DELAY
         
         try:
+            # 检查是否在交易时段内（仅自动触发时检查）
+            if not is_manual and not is_trading_hours():
+                # 更新记录为跳过状态
+                record.completed_at = datetime.now()
+                record.status = ScheduleStatus.COMPLETED
+                record.result = {"success": True, "skipped": True, "reason": "非交易时段"}
+                
+                logger.info(
+                    f"Agent {agent_id} 决策任务因非交易时段被跳过, "
+                    f"耗时: {(record.completed_at - record.started_at).total_seconds():.2f}s"
+                )
+                
+                # 保存记录
+                self._execution_records[agent_id].append(record)
+                
+                # 限制记录数量
+                if len(self._execution_records[agent_id]) > 100:
+                    self._execution_records[agent_id] = self._execution_records[agent_id][-100:]
+                
+                return record
+            
             if self._decision_callback is None:
                 # 尝试使用默认的决策回调实现
                 from app.db.session import SessionLocal
