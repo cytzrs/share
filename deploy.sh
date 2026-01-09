@@ -459,6 +459,17 @@ show_help() {
     echo ""
 }
 
+load_env() {
+    # 加载.env文件中的环境变量
+    if [ -f $ENV_FILE ]; then
+        echo "加载.env文件中的环境变量..."
+        export $(grep -v '^#' $ENV_FILE | xargs)
+        echo "环境变量加载完成！"
+    else
+        echo "警告：.env文件不存在，使用默认环境变量..."
+    fi
+}
+
 
 # 主函数
 main() {
@@ -476,6 +487,7 @@ main() {
             check_python
             check_nodejs
             check_pnpm
+            load_env
             configure_env
             test_mysql_connection
             test_redis_connection
